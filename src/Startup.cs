@@ -39,6 +39,7 @@ namespace efcorememorytest
                 }));
 
             services.AddScoped<IRepository<TestModel>, TestModelRepository>();
+            services.AddTransient<TestService, TestService>();
 
             services.AddControllers();
         }

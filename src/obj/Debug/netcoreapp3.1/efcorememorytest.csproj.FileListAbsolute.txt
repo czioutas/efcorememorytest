@@ -43,3 +43,4 @@ C:\Users\chris\Documents\Repos\efcorememorytest\src\obj\Debug\netcoreapp3.1\efco
 C:\Users\chris\Documents\Repos\efcorememorytest\src\obj\Debug\netcoreapp3.1\efcorememorytest.pdb
 C:\Users\chris\Documents\Repos\efcorememorytest\src\obj\Debug\netcoreapp3.1\efcorememorytest.genruntimeconfig.cache
 C:\Users\chris\Documents\Repos\efcorememorytest\src\obj\Debug\netcoreapp3.1\efcorememorytest.csprojAssemblyReference.cache
+C:\Users\chris\Documents\Repos\efcorememorytest\src\bin\Debug\netcoreapp3.1\MoreLinq.dll

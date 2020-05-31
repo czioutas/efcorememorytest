@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  db:
+    container_name: db
+    image: postgres:12.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: efcore
+      POSTGRES_PASSWORD: efcore
+      POSTGRES_DB: efcore
+      POSTGRES_HOST: efcore  
+    ports:
+      - '5432:5432'  

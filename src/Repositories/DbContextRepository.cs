@@ -6,6 +6,8 @@ namespace efcorememorytest.Entities
 {
     public class DbContextRepository<ENTITY> : IRepository<ENTITY> where ENTITY : class
     {
+        private bool disposedValue;
+
         public ProjectDbContext _context { get; set; }
 
         public DbContextRepository(ProjectDbContext context)
@@ -43,9 +45,30 @@ namespace efcorememorytest.Entities
             _context.SaveChanges();
         }
 
-        public Task SaveAsync()
+        public async Task SaveAsync()
         {
-            throw new System.NotImplementedException();
+            await _context.SaveChangesAsync();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _context.Dispose();
+                    _context = null;
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            System.GC.SuppressFinalize(this);
         }
     }
 }

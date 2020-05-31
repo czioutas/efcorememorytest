@@ -1,8 +1,9 @@
+using System;
 using System.Threading.Tasks;
 
 namespace efcorememorytest.Repositories
 {
-    public interface IRepository<ENTITY> where ENTITY : class
+    public interface IRepository<ENTITY>: IDisposable where ENTITY : class
     {
         ENTITY Get(long id);
 

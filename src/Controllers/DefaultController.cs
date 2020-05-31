@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture;
+using efcorememorytest.Data;
 using efcorememorytest.Entities;
 using efcorememorytest.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MoreLinq;
 
 namespace efcorememorytest.Controllers
 {
@@ -15,24 +19,28 @@ namespace efcorememorytest.Controllers
     public class DefaultController : ControllerBase
     {
         private readonly ILogger<DefaultController> _logger;
-        private readonly IRepository<TestModel> _repository;
+
+        //private readonly IRepository<TestModel> _repository;
+        private readonly IServiceProvider _serviceProvider;
+
         private readonly Fixture _fixture;
 
-        public DefaultController(ILogger<DefaultController> logger, IRepository<TestModel> repository)
+        public DefaultController(ILogger<DefaultController> logger, IServiceProvider serviceProvider)
         {
+            _serviceProvider = serviceProvider;
             _logger = logger;
-            _repository = repository;
             _fixture = new Fixture();
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetAsync()
         {
+            //HttpContext.Response.RegisterForDispose(_repository);
             // generate random entites
             IList<TestModel> _testModelsList = new List<TestModel>();
 
             Console.WriteLine("Started dummy data generation");
-            for (var i = 0; i < 10000; i++)
+            for (var i = 0; i < 100000; i++)
             {
                 _testModelsList.Add(_fixture.Build<TestModel>()
                                         .With(x => x.Id, 0)
@@ -47,27 +55,31 @@ namespace efcorememorytest.Controllers
             }
 
             // save them in batches
-            // i think ef supports this out of the box but we do it for some business logic
-            int batch = 10000;
-            int counter = 0;
-            int total = 0;
+            int batch = 1000;
 
-            foreach (TestModel _tm in _testModelsList)
+            IEnumerable<IEnumerable<TestModel>> batches = _testModelsList.Batch(batch);
+
+            foreach (IEnumerable<TestModel> _batch in batches)
             {
-                _repository.Add(_tm);
-
-                if (counter > 0 && counter % batch == 0)
-                {
-                    _repository.Save();
-                    _logger.LogInformation($"Batch #{counter / batch} [{total / batch}]");
-                }
-
-                counter++;
+                await DealWithBatchAsync(_batch);
             }
 
-            _repository.Save(); // final save for items outside of the batch
-
             return Ok(); // exit
+        }
+
+        private async Task DealWithBatchAsync(IEnumerable<TestModel> elements)
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            using (var _context = (ProjectDbContext)scope.ServiceProvider.GetRequiredService(typeof(ProjectDbContext)))
+            using (IRepository<TestModel> _repository = new DbContextRepository<TestModel>(_context))
+            {
+                foreach (TestModel _tm in elements)
+                {
+                    _repository.Add(_tm);
+                }
+
+                await _repository.SaveAsync(); // final save for items outside of the batch
+            }
         }
     }
 }
